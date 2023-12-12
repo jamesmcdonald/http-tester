@@ -26,11 +26,18 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("You sent this Authorization header: " + auth))
 }
 
+func logWrap(h http.HandlerFunc) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/auth", authHandler)
-	mux.HandleFunc("/_/health", healthHandler)
-	mux.HandleFunc("/_/readiness", readyHandler)
+	mux.Handle("/auth", logWrap(authHandler))
+	mux.Handle("/_/health", logWrap(healthHandler))
+	mux.Handle("/_/readiness", logWrap(readyHandler))
 
 	server := http.Server{
 		Addr:    ":8080",

@@ -29,6 +29,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 func logWrap(h http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
+		log.Printf("Headers: %v", r.Header)
 		h.ServeHTTP(w, r)
 	})
 }
